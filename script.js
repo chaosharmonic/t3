@@ -167,14 +167,14 @@ function aiChoice(){
   // prevent fork if player opportunity exists
   else if (checkMate(human) !== null) {return checkMate(human)}
 
+  // move on the center space
+  else if (blank.includes(4)){return 4;}
+
   // move on a corner space
   else if (corners.length > 0) {
     r = Math.floor(Math.random() * corners.length);
     return corners[r];
   }
-
-  // move on the center space
-  else if (blank.includes(4)){return 4;}
 
   // move on a side space
   else if (sides.length > 0) {
