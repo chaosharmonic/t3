@@ -1,196 +1,185 @@
 // initial game state
-var board = [
-  null, null, null,
-  null, null, null,
-  null, null, null
-]
+let board = new Array(9).fill(null)
 
-var human = null;
-var ai;
-var turn;
-var hardMode = true;
-var r;
-var blank;
+let human, cpu, turn
 
-// game start
-function reset() {
-  for (var i in board){
-    board[i] = null;
-  }
-  $(".space").text("");
-  var players = ["X", "O"];
-  r = Math.floor(Math.random() * players.length);
-  human = players.splice(r, 1)[0];
-  ai = players[0];
-  turn = "X";
-  if (ai == "X") {
-    $("h1").text("My turn!");
-    setTimeout(function(){
-      aiMove();
-    }, 2000);
-  }
-  else {
-    $("h1").text("Your move, " + human);
-  }
+const players = ['X', 'O']
+const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+// let hardMode = true
+
+const message = document.getElementById('message')
+
+const updateMessage = (text) => {
+  message.innerText = text
 }
 
-// marking a space
-function write(s, l){
-  if (board[s] == null && turn == l && human !== null){
-    board[s] = l;
-    s = "#" + s;
-    $(s).text(l);
-    if (winner(board, l)) {
-      gameOver(l);
-    }
-    else if(!(board.includes(null))){
-      gameOver("draw");
-    }
-    else if (l == human) {
-      turn = ai;
-      $("h1").text("My turn!")
-      setTimeout(function(){
-        aiMove();
-      }, 2000);
-    }
+const generateBlank = (target) => target
+  .map((space, index) => !space
+    ? index
+    : null
+  ).filter(space => space !== null)
+
+let blank = generateBlank(board)
+
+// game start
+const resetGame = () => {
+  board = new Array(9).fill(null)
+  for (const num in spaces) {
+    const id = String(num)
+    document.getElementById(id).innerText = ''
+  }
+  turn = 'X'
+
+  const r = Math.round(Math.random())
+  const s = r !== 0 ? 0 : 1
+  human = players[r]
+  cpu = players[s]
+
+  turn === cpu
+    ? takeCpuTurn()
+    : updateMessage(`Your move, ${human}`)
+}
+
+const takeHumanTurn = (space) => {
+  const turnCondition = blank.includes(Number(space)) && turn === human
+
+  if (turnCondition) write(space, human)
+}
+
+// mark a space
+const write = (space, player) => {
+  board[space] = player
+
+  document.getElementById(space).innerText = player
+
+  blank = generateBlank(board)
+
+  if (moveWinsGame(board, player)) return gameOver(player)
+  if (!blank.length) return gameOver(null)
+
+  if (player === human) {
+    turn = cpu
+    takeCpuTurn()
   }
 }
 
 // win conditions
-function winner (s, p){
-  return (
-    (p == s[0] && p == s[1] && p == s[2]) || // top row
-    (p == s[3] && p == s[4] && p == s[5]) || // mid row
-    (p == s[6] && p == s[7] && p == s[8]) || // bot row
-    (p == s[0] && p == s[3] && p == s[6]) || // left col
-    (p == s[1] && p == s[4] && p == s[7]) || // mid col
-    (p == s[2] && p == s[5] && p == s[8]) || // right col
-    (p == s[0] && p == s[4] && p == s[8]) || // diag from top left
-    (p == s[6] && p == s[4] && p == s[2]) // diag from bot left
-  )
+const moveWinsGame = (space, player) => {
+  const winConditions = [
+    [space[0], space[1], space[2]], // top row
+    [space[3], space[4], space[5]], // mid row
+    [space[6], space[7], space[8]], // bot row
+    [space[0], space[3], space[6]], // left col
+    [space[1], space[4], space[7]], // mid col
+    [space[2], space[5], space[8]], // right col
+    [space[0], space[4], space[8]], // diag from top left
+    [space[6], space[4], space[2]] // diag from bot left
+  ]
+
+  const playerWins = winConditions.some(row => row.every(s => s === player))
+
+  return playerWins
 }
 
-// end of game
-function gameOver(x) {
-  for (var i in board){
-    if (board[i] == null){
-      board[i] = -1;
-    }
-  }
-  if (x == human){
-    $("h1").text("You win!");
-  }
-  else if (x == ai) {
-    $("h1").text("Sorry!");
-  }
-  else {
-    $("h1").text("It's a draw!");
+const generateWinMessage = (winner) => {
+  if (!winner) return 'It\'s a draw!'
+
+  return winner === human
+    ? 'You win!'
+    : 'Sorry!'
+}
+
+// complete game
+function gameOver (winner) {
+  turn = null
+  const message = generateWinMessage(winner)
+  updateMessage(message)
+}
+
+// handle CPU turn
+const cpuTurn = () => {
+  if (turn) {
+    const move = chooseMove()
+    write(move, cpu)
+
+    setTimeout(endCpuTurn, 1000)
   }
 }
 
-// opposing AI logic
-function aiMove(){
-  // build an array of possible blank
-  blank = [];
-  for (var i in board){
-    if (board[i] == null){
-      blank.push(Number(i));
-    }
+const takeCpuTurn = () => {
+  if (turn) {
+    updateMessage('My turn!')
+    setTimeout(cpuTurn, 2000)
   }
+}
 
-  var move = aiChoice();
-  write (move, ai)
-  if (!(winner(board, ai)) && board.includes(null)) {
-    setTimeout(function(){
-      turn = human;
-      $("h1").text("Your move, " + human);
-    }, 1000)
+const endCpuTurn = () => {
+  if (turn) {
+    turn = human
+    updateMessage(`Your move, ${human}`)
   }
 }
 
 // analyze for a winning move on either side
-function checkWinningMove(player){
-  for (var i = 0; i < blank.length; i++){
-    var j = blank[i];
-    var boardCopy = board.slice(0);
-    boardCopy[j] = player;
-    if (winner(boardCopy, player)){
-      return j;
-    }
+const checkWinningMove = (player) => {
+  for (const i in blank) {
+    const move = blank[i]
+    const boardCopy = board.slice()
+    boardCopy[move] = player
+    const winningMove = moveWinsGame(boardCopy, player)
+
+    if (winningMove) return move
   }
-  return null;
+  return null
 }
 
-// analyze for an opportunity to fork (create two winning moves)
-function checkMate(player){
-  for (var i = 0; i < blank.length; i++){
-    var winningMoves = 0;
-    var j = blank[i];
-    var board2 = board.slice(0);
-    board2[j] = player;
+// analyze for an opportunity to branch (create two winning moves)
+const checkBranch = (player) => {
+  for (const i in blank) {
+    const move = blank[i]
+    const newBoard = board.slice()
+    newBoard[move] = player
 
-    var blank2 = blank.filter(function(x){return x !== j});
-    for (var k = 0; k < blank2.length; k++){
-      var l = blank2[k];
-      var board3 = board2.slice(0);
-      board3[l] = player;
-      if (winner(board3, player)){
-        winningMoves++;
-      }
-    }
-    if (winningMoves > 1){
-      return j;
-    }
+    const newBlank = generateBlank(newBoard)
+
+    const winningMoves = newBlank.filter(space => checkWinningMove(space))
+
+    if (winningMoves.length > 1) return move
   }
-  return null;
+  return null
 }
 
-function aiChoice(){
-  var corners = blank.filter(function(i){
-    return i == 0 || i == 2 || i == 6 || i == 8;
-  });
-  var sides = blank.filter(function(i){
-    return i == 1 || i == 3 || i == 5 || i == 7;
-  });
+const chooseMove = () => {
+  const corners = blank.filter(e => [0, 2, 6, 8].includes(e))
+  const sides = blank.filter(e => [1, 3, 5, 7].includes(e))
 
-  // selects from the following options, in order of descending priority:
+  // prioritize the following moves
 
-  // make winning move if one exists
-  if (checkWinningMove(ai) !== null) {return checkWinningMove(ai)}
+  // make (or block) winning move if one exists
+  const winningMove = checkWinningMove(cpu) || checkWinningMove(human)
+  if (winningMove) return winningMove
 
-  // prevent opponent's winning move if one exists
-  else if (checkWinningMove(human) !== null) {return checkWinningMove(human)}
-
-  // build fork if opportunity exists
-  else if (checkMate(ai) !== null) {return checkMate(ai)}
-
-  // prevent fork if player opportunity exists
-  else if (checkMate(human) !== null) {return checkMate(human)}
+  // build (or block) branch if opportunity exists
+  const branch = checkBranch(cpu) || checkBranch(human)
+  if (branch) return branch
 
   // move on the center space
-  else if (blank.includes(4)){return 4;}
+  if (blank.includes(4)) return 4
 
-  // move on a corner space
-  else if (corners.length > 0) {
-    r = Math.floor(Math.random() * corners.length);
-    return corners[r];
-  }
+  // move on a corner space, or (finally) a side space
+  const choice = corners.length > 0 ? corners : sides
+  const r = Math.floor(Math.random() * choice.length)
 
-  // move on a side space
-  else if (sides.length > 0) {
-    r = Math.floor(Math.random() * sides.length);
-    return sides[r];
-  }
-
+  return choice[r]
 }
 
 // click events
 
-$(".space").click(function(){
-  var num = Number(this.id);
-  write(num, human);
-});
+for (const num in spaces) {
+  const id = String(num)
+  const square = document.getElementById((id))
+  square.addEventListener('click', () => takeHumanTurn(id))
+}
 
-$("#reset").click(function(){
-  reset();
-})
+const reset = document.getElementById('reset')
+reset.addEventListener('click', () => resetGame())
