@@ -41,7 +41,9 @@ const resetGame = () => {
 }
 
 const takeHumanTurn = (space) => {
-  const turnCondition = blank.includes(Number(space)) && turn === human
+  const turnCondition = turn &&
+    blank.includes(Number(space)) &&
+    turn === human
 
   if (turnCondition) write(space, human)
 }
