@@ -138,7 +138,7 @@ const checkWinningMove = (player) => {
 // analyze for an opportunity to branch (create two winning moves)
 const checkBranch = (player) => {
   for (const i in blank) {
-    const move = blank[i]
+    const move = i
     const newBoard = board.slice()
     newBoard[move] = player
 
