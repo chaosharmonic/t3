@@ -24,6 +24,7 @@ let blank = generateBlank(board)
 // game start
 const resetGame = () => {
   board = new Array(9).fill(null)
+  blank = generateBlank(board)
   for (const num in spaces) {
     const id = String(num)
     document.getElementById(id).innerText = ''
@@ -94,6 +95,7 @@ const generateWinMessage = (winner) => {
 // complete game
 function gameOver (winner) {
   turn = null
+
   const message = generateWinMessage(winner)
   updateMessage(message)
 }
