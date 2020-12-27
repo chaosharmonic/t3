@@ -1,39 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat');
+@import url('https://fonts.googleapis.com/css2?family=Kalam');
+
+
 body {
   margin: 0;
-  padding: 0;
-  background: #6441A5;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #2a0845, #6441A5);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #2a0845, #6441A5); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  padding-top: 5vh;
+  background: linear-gradient(to right, #2a0845, #6441A5);
   font-family: "Montserrat";
   text-align: center;
   color: rgba(255, 255, 255, 0.7);
-
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
+h1 {
+  margin: 1vh auto;
+}
+
 #board {
-  margin: 2vh auto;
-  width: 48vh;
-  height: 48vh;
+  margin: 0 auto;
+  width: 65vmin;
+  height: 65vmin;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  align-items: center;
+  justify-items: center;
 }
 
 .space {
+  margin: 0;
   padding: 0;
-  margin: 1vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid black;
   border-radius: 10%;
-  float: left;
-  width: 13vh;
-  height: 13vh;
-  background: rgba(255, 255, 255, 0.7);
+  width: 18vmin;
+  height: 18vmin;
+  background: linear-gradient(230deg,rgba(205, 205, 205, 0.3) 40%, rgba(205, 205, 205, 0.65)) 100%;
   color: black;
   font-family: "Kalam";
-  font-size: 10vh;
+  font-size: 10vmin;
   cursor: pointer;
 }
 
@@ -41,8 +47,8 @@ button {
   background: none;
   outline: none;
   border: none;
-  cursor: pointer;
-  font-family: inherit;
   color: inherit;
-  font-size: 3vh;
+  font-family: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
 }
